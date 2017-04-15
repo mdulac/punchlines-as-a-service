@@ -1,7 +1,7 @@
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.MediaTypes.`application/json`
-import akka.http.scaladsl.model.{ContentType, HttpEntity}
+import akka.http.scaladsl.model.{ContentType, ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
@@ -16,16 +16,31 @@ trait Router {
   val punchlines: List[Punchline]
 
   val routes = pathPrefix("punchlines") {
-    path("random") {
-      get {
+    get {
+      path("daily") {
         val random = punchlines(Random.nextInt(punchlines.length))
         complete {
           HttpEntity(
-            ContentType(`application/json`.withParams(Map("charset" -> "utf-8"))),
-            toJson(random).toString()
+            ContentTypes.`text/html(UTF-8)`,
+            s"""<html>
+               |  <body>
+               |    <h1>${random.punchline}</h1>
+               |    <h3>${random.artist}</h3>
+               |  </body>
+               |</html>
+               |""".stripMargin
           )
         }
-      }
+      } ~
+        path("random") {
+          val random = punchlines(Random.nextInt(punchlines.length))
+          complete {
+            HttpEntity(
+              ContentType(`application/json`.withParams(Map("charset" -> "utf-8"))),
+              toJson(random).toString()
+            )
+          }
+        }
     }
   }
 
