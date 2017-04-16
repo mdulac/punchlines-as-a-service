@@ -12,4 +12,26 @@ class PunchlineSpec extends FlatSpec with Matchers {
     parse(fromResource("punchlines.json").mkString).as[List[Punchline]]
   }
 
+  "A Punchlines html author" should "be with underlying title and artist name" in {
+    // Given
+    val p = Punchline("punchline", "artist", None, Some("title"))
+
+    // When
+    val author = p.htmlAuthor
+
+    // Then
+    author shouldBe "<u>title</u>, artist"
+  }
+
+  "A Punchlines html author" should "be with only artist name" in {
+    // Given
+    val p = Punchline("punchline", "artist", None, None)
+
+    // When
+    val author = p.htmlAuthor
+
+    // Then
+    author shouldBe "artist"
+  }
+
 }

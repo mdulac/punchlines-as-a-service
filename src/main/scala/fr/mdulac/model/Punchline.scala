@@ -8,6 +8,11 @@ case class Punchline(punchline: String, artist: String, album: Option[String], t
 
   def toJsonString = toJson.toString()
 
+  def htmlAuthor = title
+    .filterNot(_.isEmpty)
+    .map(t => s"<u>$t</u>, $artist")
+    .getOrElse(s"$artist")
+
 }
 
 object Punchline {

@@ -49,8 +49,7 @@ trait Router {
             } ~
             path("pretty") {
               val p = PunchlinesRepository.random
-              val artist = p.artist
-              val title = p.title.getOrElse("")
+
               complete {
                 HttpEntity(
                   ContentTypes.`text/html(UTF-8)`,
@@ -71,7 +70,7 @@ trait Router {
                      |  <body>
                      |    <div class="container">
                      |      <h1>${p.punchline}</h1>
-                     |      <h3><u>$title</u>, $artist</h3>
+                     |      <h3>${p.htmlAuthor}</h3>
                      |    </div>
                      |  </body>
                      |</html>
