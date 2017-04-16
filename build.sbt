@@ -10,6 +10,7 @@ resolvers += Resolver.bintrayRepo("hseeberger", "maven")
 libraryDependencies ++= {
   Seq(
     "com.typesafe.akka" %% "akka-http" % "10.0.5",
-    "de.heikoseeberger" %% "akka-http-play-json" % "1.15.0"
+    "de.heikoseeberger" %% "akka-http-play-json" % "1.15.0",
+    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
   )
 }
