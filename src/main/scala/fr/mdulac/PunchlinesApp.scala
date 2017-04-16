@@ -10,15 +10,10 @@ import akka.http.scaladsl.model.{ContentType, ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
-import fr.mdulac.model.Punchline
-import play.api.libs.json.Json.{parse, toJson}
-
-import scala.io.Source.fromResource
-import scala.util.Random
+import fr.mdulac.repository.PunchlinesRepository
+import play.api.libs.json.Json.toJson
 
 trait Router {
-
-  val punchlines: List[Punchline]
 
   val routes =
     pathPrefix("artists") {
@@ -27,7 +22,7 @@ trait Router {
           complete {
             HttpEntity(
               ContentType(`application/json`.withParams(Map("charset" -> "utf-8"))),
-              toJson(punchlines.groupBy(_.artist).keys.toList).toString()
+              toJson(PunchlinesRepository.findAll.groupBy(_.artist).keys.toList).toString()
             )
           }
         }
@@ -39,13 +34,13 @@ trait Router {
             complete {
               HttpEntity(
                 ContentType(`application/json`.withParams(Map("charset" -> "utf-8"))),
-                toJson(punchlines).toString()
+                toJson(PunchlinesRepository.findAll).toString()
               )
             }
           } ~
             path("daily") {
               val epochSecond = now().atStartOfDay().atZone(of("UTC")).toEpochSecond
-              val p = punchlines((epochSecond % punchlines.length).toInt)
+              val p = PunchlinesRepository.findAll((epochSecond % PunchlinesRepository.findAll.length).toInt)
               complete {
                 HttpEntity(
                   ContentType(`application/json`.withParams(Map("charset" -> "utf-8"))),
@@ -54,7 +49,7 @@ trait Router {
               }
             } ~
             path("pretty") {
-              val random = punchlines(Random.nextInt(punchlines.length))
+              val random = PunchlinesRepository.random
               val artist = random.artist
               val title = random.title.getOrElse("")
               complete {
@@ -86,7 +81,7 @@ trait Router {
               }
             } ~
             path("random") {
-              val random = punchlines(Random.nextInt(punchlines.length))
+              val random = PunchlinesRepository.random
               complete {
                 HttpEntity(
                   ContentType(`application/json`.withParams(Map("charset" -> "utf-8"))),
@@ -96,7 +91,7 @@ trait Router {
             } ~
             pathPrefix("artist") {
               path(Segment) { artist =>
-                val p = punchlines.filter(_.artist.toLowerCase == artist.toLowerCase)
+                val p = PunchlinesRepository.findByArtist(artist)
                 complete {
                   HttpEntity(
                     ContentType(`application/json`.withParams(Map("charset" -> "utf-8"))),
@@ -110,15 +105,13 @@ trait Router {
 
 }
 
-object PunchlinesService extends App with Router {
+object PunchlinesApp extends App with Router {
 
   implicit val system = ActorSystem()
   implicit val executor = system.dispatcher
   implicit val materializer = ActorMaterializer()
 
   val config = ConfigFactory.load()
-
-  override lazy val punchlines = parse(fromResource("punchlines.json").mkString).as[List[Punchline]]
 
   Http().bindAndHandle(routes, config.getString("http.interface"), config.getInt("http.port"))
 
