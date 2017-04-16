@@ -17,21 +17,29 @@ trait Router {
 
   val routes = pathPrefix("punchlines") {
     get {
-      path("daily") {
-        val random = punchlines(Random.nextInt(punchlines.length))
+      pathEnd {
         complete {
           HttpEntity(
-            ContentTypes.`text/html(UTF-8)`,
-            s"""<html>
-               |  <body>
-               |    <h1>${random.punchline}</h1>
-               |    <h3>${random.artist}</h3>
-               |  </body>
-               |</html>
-               |""".stripMargin
+            ContentType(`application/json`.withParams(Map("charset" -> "utf-8"))),
+            toJson(punchlines).toString()
           )
         }
       } ~
+        path("daily") {
+          val random = punchlines(Random.nextInt(punchlines.length))
+          complete {
+            HttpEntity(
+              ContentTypes.`text/html(UTF-8)`,
+              s"""<html>
+                 |  <body>
+                 |    <h1>${random.punchline}</h1>
+                 |    <h3>${random.artist}</h3>
+                 |  </body>
+                 |</html>
+                 |""".stripMargin
+            )
+          }
+        } ~
         path("random") {
           val random = punchlines(Random.nextInt(punchlines.length))
           complete {
@@ -39,6 +47,17 @@ trait Router {
               ContentType(`application/json`.withParams(Map("charset" -> "utf-8"))),
               toJson(random).toString()
             )
+          }
+        } ~
+        pathPrefix("artist") {
+          path(Segment) { artist =>
+            val p = punchlines.filter(_.artist.toLowerCase == artist.toLowerCase)
+            complete {
+              HttpEntity(
+                ContentType(`application/json`.withParams(Map("charset" -> "utf-8"))),
+                toJson(p).toString()
+              )
+            }
           }
         }
     }
