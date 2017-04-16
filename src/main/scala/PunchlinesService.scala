@@ -27,13 +27,30 @@ trait Router {
       } ~
         path("daily") {
           val random = punchlines(Random.nextInt(punchlines.length))
+          val artist = random.artist
+          val title = random.title.getOrElse("")
           complete {
             HttpEntity(
               ContentTypes.`text/html(UTF-8)`,
               s"""<html>
+                 |  <head>
+                 |    <style>
+                 |      html, body, .container {
+                 |        height: 100%;
+                 |      }
+                 |      .container {
+                 |        display: flex;
+                 |        align-items: center;
+                 |        justify-content: center;
+                 |        flex-direction: column;
+                 |      }
+                 |    </style>
+                 |  </head>
                  |  <body>
-                 |    <h1>${random.punchline}</h1>
-                 |    <h3>${random.artist}</h3>
+                 |    <div class="container">
+                 |      <h1>${random.punchline}</h1>
+                 |      <h3><u>$title</u>, $artist</h3>
+                 |    </div>
                  |  </body>
                  |</html>
                  |""".stripMargin
