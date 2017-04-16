@@ -2,7 +2,13 @@ package fr.mdulac.model
 
 import play.api.libs.json.Json
 
-case class Punchline(punchline: String, artist: String, album: Option[String], title: Option[String])
+case class Punchline(punchline: String, artist: String, album: Option[String], title: Option[String]) {
+
+  def toJson = Json.toJson(this)
+
+  def toJsonString = toJson.toString()
+
+}
 
 object Punchline {
 

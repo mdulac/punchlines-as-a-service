@@ -1,10 +1,12 @@
 package fr.mdulac.repository
 
+import java.time.ZonedDateTime
+
 import fr.mdulac.model.Punchline
+import org.scalacheck.Gen.oneOf
 import play.api.libs.json.Json.parse
 
 import scala.io.Source.fromResource
-import scala.util.Random
 
 object PunchlinesRepository {
 
@@ -14,6 +16,8 @@ object PunchlinesRepository {
 
   def findByArtist(artist: String) = punchlines.filter(_.artist.toLowerCase == artist.toLowerCase)
 
-  def random = punchlines(Random.nextInt(punchlines.length))
+  def random = oneOf(punchlines).sample.get
+
+  def forDate(date: ZonedDateTime) = punchlines((date.toEpochSecond % punchlines.length).toInt)
 
 }

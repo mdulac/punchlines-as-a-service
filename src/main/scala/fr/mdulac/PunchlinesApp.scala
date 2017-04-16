@@ -39,19 +39,18 @@ trait Router {
             }
           } ~
             path("daily") {
-              val epochSecond = now().atStartOfDay().atZone(of("UTC")).toEpochSecond
-              val p = PunchlinesRepository.findAll((epochSecond % PunchlinesRepository.findAll.length).toInt)
+              val p = PunchlinesRepository.forDate(now().atStartOfDay().atZone(of("UTC")))
               complete {
                 HttpEntity(
                   ContentType(`application/json`.withParams(Map("charset" -> "utf-8"))),
-                  toJson(p).toString()
+                  p.toJsonString
                 )
               }
             } ~
             path("pretty") {
-              val random = PunchlinesRepository.random
-              val artist = random.artist
-              val title = random.title.getOrElse("")
+              val p = PunchlinesRepository.random
+              val artist = p.artist
+              val title = p.title.getOrElse("")
               complete {
                 HttpEntity(
                   ContentTypes.`text/html(UTF-8)`,
@@ -71,7 +70,7 @@ trait Router {
                      |  </head>
                      |  <body>
                      |    <div class="container">
-                     |      <h1>${random.punchline}</h1>
+                     |      <h1>${p.punchline}</h1>
                      |      <h3><u>$title</u>, $artist</h3>
                      |    </div>
                      |  </body>
@@ -81,21 +80,21 @@ trait Router {
               }
             } ~
             path("random") {
-              val random = PunchlinesRepository.random
+              val p = PunchlinesRepository.random
               complete {
                 HttpEntity(
                   ContentType(`application/json`.withParams(Map("charset" -> "utf-8"))),
-                  toJson(random).toString()
+                  p.toJsonString
                 )
               }
             } ~
             pathPrefix("artist") {
               path(Segment) { artist =>
-                val p = PunchlinesRepository.findByArtist(artist)
+                val ps = PunchlinesRepository.findByArtist(artist)
                 complete {
                   HttpEntity(
                     ContentType(`application/json`.withParams(Map("charset" -> "utf-8"))),
-                    toJson(p).toString()
+                    toJson(ps).toString()
                   )
                 }
               }
