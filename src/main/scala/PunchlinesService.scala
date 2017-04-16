@@ -1,3 +1,6 @@
+import java.time.LocalDate.now
+import java.time.ZoneId.of
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.MediaTypes.`application/json`
@@ -26,6 +29,16 @@ trait Router {
         }
       } ~
         path("daily") {
+          val epochSecond = now().atStartOfDay().atZone(of("UTC")).toEpochSecond
+          val p = punchlines((epochSecond % punchlines.length).toInt)
+          complete {
+            HttpEntity(
+              ContentType(`application/json`.withParams(Map("charset" -> "utf-8"))),
+              toJson(p).toString()
+            )
+          }
+        } ~
+        path("pretty") {
           val random = punchlines(Random.nextInt(punchlines.length))
           val artist = random.artist
           val title = random.title.getOrElse("")
