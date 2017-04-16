@@ -1,7 +1,11 @@
+enablePlugins(JavaAppPackaging)
+
 name := "punchlines"
 organization := "mdulac"
 version := "1.0"
 scalaVersion := "2.12.1"
+
+resolvers += Resolver.bintrayRepo("hseeberger", "maven")
 
 libraryDependencies ++= {
   Seq(
